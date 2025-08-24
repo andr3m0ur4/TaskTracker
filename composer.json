@@ -1,0 +1,8 @@
+{
+    "name": "alistair/task-tracker",
+    "autoload": {
+        "psr-4": {
+            "TaskTracker\\": "src/"
+        }
+    }
+}
