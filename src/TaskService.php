@@ -71,6 +71,37 @@ class TaskService
         return null;
     }
 
+    public function markTaskInProgress(int $id): ?Task
+    {
+        return $this->updateStatusTask($id, 'in-progress');
+    }
+
+    public function markTaskDone(int $id): ?Task
+    {
+        return $this->updateStatusTask($id, 'done');
+    }
+
+    public function updateStatusTask(int $id, string $status): ?Task
+    {
+        $tasks = $this->listTasks();
+        if (empty($tasks)) {
+            return null;
+        }
+
+        foreach ($tasks as $task) {
+            if ($task->getId() === $id) {
+                $task->setStatus($status);
+                $task->setUpdatedAt(new DateTimeImmutable());
+
+                $json = json_encode($tasks, JSON_PRETTY_PRINT);
+                file_put_contents('tasks.json', $json);
+                return $task;
+            }
+        }
+
+        return null;
+    }
+
     public function deleteTask(int $id): ?Task
     {
         $tasks = $this->listTasks();

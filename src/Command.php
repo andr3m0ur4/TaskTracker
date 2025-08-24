@@ -46,6 +46,22 @@ class Command
                     echo "Task updated successfully (ID: " . $task->getId() . ")" . PHP_EOL;
                 }
                 break;
+            case 'mark-in-progress':
+                $task = $this->taskService->markTaskInProgress((int) ($options[0] ?? 0));
+                if (is_null($task)) {
+                    echo "Task not found." . PHP_EOL;
+                } else {
+                    echo "Task marked as in-progress (ID: " . $task->getId() . ")" . PHP_EOL;
+                }
+                break;
+            case 'mark-done':
+                $task = $this->taskService->markTaskDone((int) ($options[0] ?? 0));
+                if (is_null($task)) {
+                    echo "Task not found." . PHP_EOL;
+                } else {
+                    echo "Task marked as done (ID: " . $task->getId() . ")" . PHP_EOL;
+                }
+                break;
             case 'delete':
                 $task = $this->taskService->deleteTask((int) ($options[0] ?? 0));
                 if (is_null($task)) {
