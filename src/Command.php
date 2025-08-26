@@ -35,7 +35,7 @@ class Command
                 echo "Task added successfully (ID: " . $task->getId() . ")" . PHP_EOL;
                 break;
             case 'list':
-                $tasks = $this->taskService->listTasks();
+                $tasks = $this->taskService->listTasks($options[0] ?? 'all');
                 $this->printTasks($tasks);
                 break;
             case 'update':

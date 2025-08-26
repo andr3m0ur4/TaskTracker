@@ -24,7 +24,7 @@ class TaskService
     /**
      * @return Task[]
      */
-    public function listTasks(): array
+    public function listTasks(string $status = 'all'): array
     {
         if (!file_exists('tasks.json')) {
             return [];
@@ -45,6 +45,10 @@ class TaskService
             $task->setCreatedAt(new DateTimeImmutable($item['createdAt']));
             $task->setUpdatedAt(new DateTimeImmutable($item['updatedAt']));
             $tasks[] = $task;
+        }
+
+        if ($status !== 'all') {
+            $tasks = array_filter($tasks, fn (Task $task) => $task->getStatus() === $status);
         }
 
         return $tasks;
