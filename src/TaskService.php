@@ -6,6 +6,10 @@ use DateTimeImmutable;
 
 class TaskService
 {
+    public function __construct(private TaskFileSystem $taskFileSystem = new TaskFileSystem())
+    {
+    }
+    
     public function addTask(string $description): Task
     {
         $task = new Task($description);
@@ -16,24 +20,17 @@ class TaskService
 
         $tasks[] = $task;
 
-        $json = json_encode($tasks, JSON_PRETTY_PRINT);
-        file_put_contents('tasks.json', $json);
+        $this->taskFileSystem->recordTasks($tasks);
         return $task;
     }
 
     /**
      * @return Task[]
      */
-    public function listTasks(string $status = 'all'): array
+    public function listTasks(): array
     {
-        if (!file_exists('tasks.json')) {
-            return [];
-        }
-
-        $json = file_get_contents('tasks.json');
-        $data = json_decode($json, true);
-
-        if (is_null($data) || !is_array($data)) {
+        $data = $this->taskFileSystem->readTasks();
+        if (empty($data)) {
             return [];
         }
 
@@ -47,11 +44,17 @@ class TaskService
             $tasks[] = $task;
         }
 
-        if ($status !== 'all') {
-            $tasks = array_filter($tasks, fn (Task $task) => $task->getStatus() === $status);
-        }
-
         return $tasks;
+    }
+
+    /**
+     * @param TaskStatus $status
+     * @return Task[]
+     */
+    public function listTasksByStatus(TaskStatus $status): array
+    {
+        $tasks = $this->listTasks();
+        return array_filter($tasks, fn (Task $task) => $task->getStatus() === $status->value);
     }
 
     public function updateTask(int $id, string $description): ?Task
@@ -66,8 +69,7 @@ class TaskService
                 $task->setDescription($description);
                 $task->setUpdatedAt(new DateTimeImmutable());
 
-                $json = json_encode($tasks, JSON_PRETTY_PRINT);
-                file_put_contents('tasks.json', $json);
+                $this->taskFileSystem->recordTasks($tasks);
                 return $task;
             }
         }
@@ -77,15 +79,15 @@ class TaskService
 
     public function markTaskInProgress(int $id): ?Task
     {
-        return $this->updateStatusTask($id, 'in-progress');
+        return $this->updateStatusTask($id, TaskStatus::IN_PROGRESS);
     }
 
     public function markTaskDone(int $id): ?Task
     {
-        return $this->updateStatusTask($id, 'done');
+        return $this->updateStatusTask($id, TaskStatus::DONE);
     }
 
-    public function updateStatusTask(int $id, string $status): ?Task
+    public function updateStatusTask(int $id, TaskStatus $status): ?Task
     {
         $tasks = $this->listTasks();
         if (empty($tasks)) {
@@ -94,11 +96,10 @@ class TaskService
 
         foreach ($tasks as $task) {
             if ($task->getId() === $id) {
-                $task->setStatus($status);
+                $task->setStatus($status->value);
                 $task->setUpdatedAt(new DateTimeImmutable());
 
-                $json = json_encode($tasks, JSON_PRETTY_PRINT);
-                file_put_contents('tasks.json', $json);
+                $this->taskFileSystem->recordTasks($tasks);
                 return $task;
             }
         }
@@ -117,8 +118,7 @@ class TaskService
             if ($task->getId() === $id) {
                 unset($tasks[$index]);
                 
-                $json = json_encode($tasks, JSON_PRETTY_PRINT);
-                file_put_contents('tasks.json', $json);
+                $this->taskFileSystem->recordTasks($tasks);
                 return $task;
             }
         }

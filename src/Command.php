@@ -4,7 +4,7 @@ namespace TaskTracker;
 
 class Command
 {
-    public function __construct(private TaskService $taskService = new TaskService())
+    public function __construct(private TaskController $taskController = new TaskController())
     {
     }
 
@@ -31,60 +31,28 @@ class Command
     {
         switch ($command) {
             case 'add':
-                $task = $this->taskService->addTask($options[0] ?? 'No description');
-                echo "Task added successfully (ID: " . $task->getId() . ")" . PHP_EOL;
+                $output = $this->taskController->addTask($options[0] ?? 'No description');
                 break;
             case 'list':
-                $tasks = $this->taskService->listTasks($options[0] ?? 'all');
-                $this->printTasks($tasks);
+                $output = $this->taskController->listTasks($options[0] ?? null);
                 break;
             case 'update':
-                $task = $this->taskService->updateTask((int) ($options[0] ?? 0), $options[1] ?? 'No description');
-                if (is_null($task)) {
-                    echo "Task not found." . PHP_EOL;
-                } else {
-                    echo "Task updated successfully (ID: " . $task->getId() . ")" . PHP_EOL;
-                }
+                $output = $this->taskController->updateTask((int) ($options[0] ?? 0), $options[1] ?? 'No description');
                 break;
             case 'mark-in-progress':
-                $task = $this->taskService->markTaskInProgress((int) ($options[0] ?? 0));
-                if (is_null($task)) {
-                    echo "Task not found." . PHP_EOL;
-                } else {
-                    echo "Task marked as in-progress (ID: " . $task->getId() . ")" . PHP_EOL;
-                }
+                $output = $this->taskController->markTaskInProgress((int) ($options[0] ?? 0));
                 break;
             case 'mark-done':
-                $task = $this->taskService->markTaskDone((int) ($options[0] ?? 0));
-                if (is_null($task)) {
-                    echo "Task not found." . PHP_EOL;
-                } else {
-                    echo "Task marked as done (ID: " . $task->getId() . ")" . PHP_EOL;
-                }
+                $output = $this->taskController->markTaskDone((int) ($options[0] ?? 0));
                 break;
             case 'delete':
-                $task = $this->taskService->deleteTask((int) ($options[0] ?? 0));
-                if (is_null($task)) {
-                    echo "Task not found." . PHP_EOL;
-                } else {
-                    echo "Task deleted successfully (ID: " . $task->getId() . ")" . PHP_EOL;
-                }
+                $output = $this->taskController->deleteTask((int) ($options[0] ?? 0));
                 break;
             default:
                 echo "Unknown command: $command" . PHP_EOL;
                 exit(1);
         }
-    }
 
-    private function printTasks(array $tasks)
-    {
-        if (empty($tasks)) {
-            echo "No tasks found." . PHP_EOL;
-            return;
-        }
-
-        foreach ($tasks as $task) {
-            echo "[" . $task->getId() . "] " . $task->getDescription() . " (" . $task->getStatus() . ")" . PHP_EOL;
-        }
+        echo $output;
     }
 }
