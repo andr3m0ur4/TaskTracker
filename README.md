@@ -1,6 +1,7 @@
 # Task Tracker
 
-A simple CLI-based task tracker application built with PHP.
+A simple CLI-based Task Tracker application built with PHP for the [task-tracker](https://roadmap.sh/projects/task-tracker) challenge.
+
 It allows you to create, update, delete, and manage tasks directly from your terminal.
 
 ## 🚀 Features
